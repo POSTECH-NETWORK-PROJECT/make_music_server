@@ -70,7 +70,8 @@ class ManageClientThread extends Thread{
 				else if(line.equals("/showRoomList")){
 					Iterator<String> it = roomList.iterator();
 					while(it.hasNext()){
-						pw.println(it.toString());
+						String address = it.next();
+						pw.println(address);
 						pw.flush();
 					}
 				}
