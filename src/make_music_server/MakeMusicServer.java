@@ -59,12 +59,16 @@ class ManageClientThread extends Thread{
 					synchronized(roomList){
 						roomList.add(sock.getInetAddress().getHostAddress());
 					}
+					pw.println("/createRoomEND");
+					pw.flush();
 				}
 				// Command deleteRoom : host exit its room and server erase this room to roomList.
 				else if(line.equals("/deleteRoom")){
 					synchronized(roomList){
 						roomList.remove(sock.getInetAddress().getHostAddress());
 					}
+					pw.println("/deleteRoomEND");
+					pw.flush();
 				}
 				// Command showRoomList : client is in the LIST state and request the roomList, so server provide the roomList.
 				else if(line.equals("/showRoomList")){
@@ -74,6 +78,8 @@ class ManageClientThread extends Thread{
 						pw.println(address);
 						pw.flush();
 					}
+					pw.println("/showRoomListEND");
+					pw.flush();
 				}
 				// Command quit : host or client leave this server.
 				else if(line.equals("/quit"))
