@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -61,6 +62,8 @@ class ManageClientThread extends Thread{
 					outputStream.flush();
 				}
 			}
+		} catch(SocketException se){
+			System.out.println("ConnectionÀÌ ²÷°å½À´Ï´Ù.");
 		} catch(Exception e){
 			e.printStackTrace();
 		} finally{

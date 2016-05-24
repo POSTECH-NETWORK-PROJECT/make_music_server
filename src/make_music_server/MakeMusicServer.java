@@ -4,7 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 
-public class Main {
+public class MakeMusicServer {
 	public static void main(String[] args){
 		ServerSocket server = null;
 		try{
