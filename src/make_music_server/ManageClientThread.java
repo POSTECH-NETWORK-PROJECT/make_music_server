@@ -32,8 +32,8 @@ class ManageClientThread extends Thread{
 		id = inputStream.readLine();
 		ipAddress = sock.getInetAddress().getHostAddress();
 		// ID and address setting.
-		synchronized(userList){
-			userList.put(ipAddress, id);
+		synchronized(this.userList){
+			this.userList.put(ipAddress, id);
 		}
 		System.out.println(sock.toString());
 		System.out.println("Server에 접속한 사용자의 ID는 "+id+"입니다.");
