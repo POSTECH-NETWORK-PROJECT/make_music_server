@@ -2,7 +2,7 @@ package make_music_server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
+import java.util.HashMap;
 
 public class MakeMusicServer {
 	public static void main(String[] args){
@@ -10,10 +10,14 @@ public class MakeMusicServer {
 		try{
 			server = new ServerSocket(10002);
 			System.out.println("[MAIN SERVER] 접속을 기다립니다.");
-			HashSet<String> roomList = new HashSet<String>();
+			// Save IP address and room name and id using hash map.
+			HashMap<String, String> roomList = new HashMap<String, String>();
+			HashMap<String, String> userList = new HashMap<String, String>();
+			// Server doesn't end unless there are exception.
 			while(true){
 				Socket sock = server.accept();
-				ManageClientThread t = new ManageClientThread(sock,roomList);
+				// Using thread to handle each client.
+				ManageClientThread t = new ManageClientThread(sock,roomList, userList);
 				t.start();
 			}
 		} catch(Exception e){

@@ -7,26 +7,36 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 
 class ManageClientThread extends Thread{
 	private Socket sock;
 	private String id;
+	private String ipAddress;
 	private BufferedReader inputStream;
 	private PrintWriter outputStream;
-	private HashSet<String> roomList;
+	private HashMap<String, String> roomList;
+	private HashMap<String, String> userList;
 	
-	public ManageClientThread(Socket sock, HashSet<String> roomList) throws IOException{
+	public ManageClientThread(Socket sock, HashMap<String, String> roomList, HashMap<String, String> userList) throws IOException{
 		this.sock = sock;
 		this.roomList = roomList;
+		this.userList = userList;
 		inputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		outputStream = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+		// Socket setting.
 		System.out.println("접속 성공!");
 		
+		// Client send ID to server.
 		id = inputStream.readLine();
-		
-		System.out.println("Server에 접속한 사용자의 아이디는 "+id+"입니다.");
+		ipAddress = sock.getInetAddress().getHostAddress();
+		// ID and address setting.
+		synchronized(userList){
+			userList.put(ipAddress, id);
+		}
+		System.out.println(sock.toString());
+		System.out.println("Server에 접속한 사용자의 ID는 "+id+"입니다.");
 	}
 	
 	public void run(){
@@ -34,39 +44,71 @@ class ManageClientThread extends Thread{
 			String line = null;
 			
 			while((line = inputStream.readLine()) != null){
-				System.out.println(line);
+				System.out.println(ipAddress+"에서 보낸 명령어: "+line);
+				// @quit is end signal from client.
 				if(line.equals("@quit"))
 					break;
-				else if(line.equals("@addRoom")){
+				// @addRoom is to add room to roomList signal from client.
+				else if(line.indexOf("@addRoom") == 0){
+					int roomNameIndex = line.indexOf(" ")+1;
 					synchronized(roomList){
-						roomList.add(id);
+						roomList.put(ipAddress, line.substring(roomNameIndex));
 					}
 					outputStream.println("@END addRoom");
 					outputStream.flush();
 				}
+				// @removeRoom is to remove room to roomList signal from client.
 				else if(line.equals("@removeRoom")){
 					synchronized(roomList){
-						roomList.remove(id);
+						roomList.remove(ipAddress);
 					}
 					outputStream.println("@END removeRoom");
 					outputStream.flush();
 				}
+				// @showRoomList is the signal from client that request room list.
 				else if(line.equals("@showRoomList")){
-					Iterator<String> it = roomList.iterator();
+					Iterator<HashMap.Entry<String, String>> it = roomList.entrySet().iterator();
+					
 					while(it.hasNext()){
-						String room = (String)it.next();
-						outputStream.println(room);
+						HashMap.Entry<String, String> room = it.next();
+						// message format: (room name):(room ip address) 
+						outputStream.println(room.getValue() + ":" + room.getKey());
 						outputStream.flush();
 					}
 					outputStream.println("@END showRoomList");
 					outputStream.flush();
 				}
+				// @showUserList is the signal form client that request user list.
+				else if(line.equals("@showUserList")){
+					Iterator<String> it = userList.values().iterator();
+					while(it.hasNext()){
+						String user = it.next();
+						outputStream.println(user);
+						outputStream.flush();
+					}
+					outputStream.println("@END showUserList");
+					outputStream.flush();
+				}
 			}
 		} catch(SocketException se){
-			System.out.println("Connection이 끊겼습니다.");
+			// Client exit using X button in right-top side.
+			System.out.println(ipAddress+"와 Connection이 끊겼습니다.");
+			try{
+				if(outputStream != null)
+					outputStream.close();
+				if(inputStream != null)
+					inputStream.close();
+				if(sock != null)
+					sock.close();
+			} catch(IOException e){
+				e.printStackTrace();
+			}
 		} catch(Exception e){
 			e.printStackTrace();
 		} finally{
+			synchronized(userList){
+				userList.remove(ipAddress);
+			}
 			try{
 				if(sock != null)
 					sock.close();
