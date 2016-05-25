@@ -19,17 +19,20 @@ class ManageClientThread extends Thread{
 	private HashMap<String, String> roomList;
 	private HashMap<String, String> userList;
 	
-	public ManageClientThread(Socket sock, HashMap<String, String> roomList, HashMap<String, String> userList) throws IOException{
+	public ManageClientThread(Socket sock, HashMap<String, String> roomList, HashMap<String, String> userList){
 		this.sock = sock;
 		this.roomList = roomList;
 		this.userList = userList;
-		inputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		outputStream = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-		// Socket setting.
-		System.out.println("立加 己傍!");
+		try{
+			inputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			outputStream = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+			// Socket setting.
+			System.out.println("立加 己傍!");
 		
-		// Client send ID to server.
-		id = inputStream.readLine();
+			// Client send ID to server.
+			id = inputStream.readLine();
+		} catch(IOException e){
+		}
 		ipAddress = sock.getInetAddress().getHostAddress();
 		// ID and address setting.
 		synchronized(this.userList){
