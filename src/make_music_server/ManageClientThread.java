@@ -92,7 +92,6 @@ class ManageClientThread extends Thread{
 			}
 		} catch(SocketException se){
 			// Client exit using X button in right-top side.
-			System.out.println(ipAddress+"¿Í ConnectionÀÌ ²÷°å½À´Ï´Ù.");
 			try{
 				if(outputStream != null)
 					outputStream.close();
@@ -106,8 +105,12 @@ class ManageClientThread extends Thread{
 		} catch(Exception e){
 			e.printStackTrace();
 		} finally{
+			System.out.println(ipAddress+"¿Í ConnectionÀÌ ²÷°å½À´Ï´Ù.");
 			synchronized(userList){
 				userList.remove(ipAddress);
+			}
+			synchronized(roomList){
+				roomList.remove(ipAddress);
 			}
 			try{
 				if(sock != null)
